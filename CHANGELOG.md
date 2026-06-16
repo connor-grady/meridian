@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.44.0](https://github.com/rynfar/meridian/compare/meridian-v1.43.0...meridian-v1.44.0) (2026-06-16)
+
+
+### Features
+
+* **effort:** accept reasoning_effort end-to-end (OpenAI translation + validation) ([#536](https://github.com/rynfar/meridian/issues/536)) ([bf38f2b](https://github.com/rynfar/meridian/commit/bf38f2bfdf6e2005b0367b337272151b8f531110))
+
+
+### Bug Fixes
+
+* **logging:** gate [PROXY] operational stderr behind config.silent ([#537](https://github.com/rynfar/meridian/issues/537)) ([e69a8db](https://github.com/rynfar/meridian/commit/e69a8db71c04c8e3b0ab8249835619df413d5d85))
+* **openai:** don't inject claude_code preset on /v1/chat/completions ([#533](https://github.com/rynfar/meridian/issues/533)) ([1e8ddd3](https://github.com/rynfar/meridian/commit/1e8ddd3e59ea7e2ac54b837f4ed3e71cabe250e0))
+* **tokenRefresh:** silence scheduled refresh log ([#518](https://github.com/rynfar/meridian/issues/518)) ([da722a3](https://github.com/rynfar/meridian/commit/da722a397ff5b39e946bf5012b924323fb199c1e))
+
 ## [1.43.0](https://github.com/rynfar/meridian/compare/meridian-v1.42.1...meridian-v1.43.0) (2026-05-29)
 
 
