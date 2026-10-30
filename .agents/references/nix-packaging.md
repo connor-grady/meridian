@@ -15,8 +15,8 @@ Each package lives in `nix/pkgs/<name>/`, with its entry point in
   its dependency trees.
 - `nix/pkgs/claude-code/`: the `claude-code` meridian runs (see below).
 - `nix/pkgs/buildMeridianPlugin/`: the builder shared by the scrub plugins.
-  `nix/scope.nix` calls it once per `meridian-plugin-*` input to build
-  `meridianPlugins`.
+- `nix/pkgs/meridianPlugins/<name>/`: one scrub plugin each. A directory without
+  a `package.nix` becomes a nested attribute set.
 
 Overlays live in `nix/overlays/`, named for their flake output
 (`meridian.nix`).
@@ -86,6 +86,20 @@ nix/pkgs/claude-code/update.sh
 
 The `Check claude-code floor manifests` workflow runs the script and fails the
 PR if the result differs from what is committed.
+
+## Plugins follow their release tags
+
+Each plugin's `package.nix` fetches its repository at the tag
+`<pname>-v<version>`. The `Update plugins` workflow runs `nix-update` on each
+plugin for its latest release, rebuilds it and opens a PR. To update one by
+hand:
+
+```sh
+nix run --inputs-from . nixpkgs#nix-update -- --flake --version-regex 'meridian-plugin-<name>-v(.*)' legacyPackages.x86_64-linux.meridianPlugins.<name>
+```
+
+The builder's install check fails if the version the installed plugin reports
+differs from the Nix `version`.
 
 ## node_modules is a fixed-output derivation
 

@@ -10,18 +10,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    meridian-plugin-hermes-scrub = {
-      url = "github:rynfar/meridian-plugin-hermes-scrub";
-      flake = false;
-    };
-    meridian-plugin-opencode-scrub = {
-      url = "github:rynfar/meridian-plugin-opencode-scrub";
-      flake = false;
-    };
-    meridian-plugin-pi-scrub = {
-      url = "github:rynfar/meridian-plugin-pi-scrub";
-      flake = false;
-    };
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     systems.url = "github:nix-systems/default";
   };
