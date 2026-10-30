@@ -1,4 +1,5 @@
 {
+  claude-code,
   lib,
   newScope,
   self,
@@ -16,6 +17,7 @@ lib.makeScope newScope (
   }
   // {
     inherit self;
+    claude-code = scope.callPackage ./pkgs/claude-code/package.nix { inherit claude-code; };
     meridianPlugins = pipe self.inputs [
       (filterAttrs (pname: _: hasPrefix "meridian-plugin-" pname))
       (mapAttrs' (

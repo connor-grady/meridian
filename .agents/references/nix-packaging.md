@@ -13,6 +13,7 @@ Each package lives in `nix/pkgs/<name>/`, with its entry point in
 
 - `nix/pkgs/meridian/`: meridian. `package.nix` calls `node_modules.nix` for
   its dependency trees.
+- `nix/pkgs/claude-code/`: the `claude-code` meridian runs (see below).
 - `nix/pkgs/buildMeridianPlugin/`: the builder shared by the scrub plugins.
   `nix/scope.nix` calls it once per `meridian-plugin-*` input to build
   `meridianPlugins`.
@@ -58,6 +59,33 @@ Manager module's default with the module's `pkgs`, and the flake's own
 - Accepting `claude-code`'s unfree licence is the consumer's decision. The flake
   never sets `allowUnfree` or `allowUnfreePredicate`. Evaluate meridian locally
   and in CI with `NIXPKGS_ALLOW_UNFREE=1` and `--impure`.
+
+## claude-code is floored when consumed
+
+Meridian needs at least the `@anthropic-ai/claude-code` version in
+`package.json`. `nix/pkgs/claude-code/package.nix` takes the consumer's
+`claude-code` and returns it unchanged when it meets that floor. Otherwise it
+returns the same package overridden with Anthropic's release manifest for the
+floor, so the decision is made against the consumer's nixpkgs at evaluation
+time, never against the nixpkgs locked here.
+
+- The directory holds both manifest formats: `manifest.json` for nixpkgs whose
+  `claude-code` fetches the plain binary, and `manifest.zst.json` for nixpkgs
+  that fetches `claude.zst`. The package picks by `claude-code.src.url`.
+- `nix/scope.nix` supplies the consumer's `claude-code` to it explicitly.
+  Inside the scope its own `claude-code` argument would resolve to itself, and
+  its value depends strictly on that argument's version.
+- Never override `claude-code` anywhere else, and never edit the manifests by
+  hand.
+
+Raising the floor in `package.json` updates the manifests in the same commit:
+
+```sh
+nix/pkgs/claude-code/update.sh
+```
+
+The `Check claude-code floor manifests` workflow runs the script and fails the
+PR if the result differs from what is committed.
 
 ## node_modules is a fixed-output derivation
 

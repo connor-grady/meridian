@@ -58,7 +58,7 @@ Then in `~/.config/opencode/opencode.json`:
 
 > **Important:** Do not use `meridian setup` on NixOS. It writes an absolute Nix store path (e.g. `/nix/store/...-meridian-1.x.x/lib/...`) into your OpenCode config, which will break on the next `nixos-rebuild switch` or `home-manager switch` when the store path changes. Use one of the approaches above instead.
 
-> **Note:** Meridian depends on the unfree `claude-code` from nixpkgs instead of bundling its own binary. With the overlay, allow it in your nixpkgs config, e.g. `nixpkgs.config.allowUnfreePredicate = pkg: lib.getName pkg == "claude-code";`. `packages.<system>.meridian` is built with the flake's own nixpkgs, so your nixpkgs config does not reach it; allow `claude-code` for it with `NIXPKGS_ALLOW_UNFREE=1` and `--impure`. The Home Manager module below builds Meridian the same way as the overlay, with its own `pkgs`, so it does not need the overlay.
+> **Note:** Meridian depends on the unfree `claude-code` from nixpkgs instead of bundling its own binary. With the overlay, allow it in your nixpkgs config, e.g. `nixpkgs.config.allowUnfreePredicate = pkg: lib.getName pkg == "claude-code";`. `packages.<system>.meridian` is built with the flake's own nixpkgs, so your nixpkgs config does not reach it; allow `claude-code` for it with `NIXPKGS_ALLOW_UNFREE=1` and `--impure`. The Home Manager module below builds Meridian the same way as the overlay, with its own `pkgs`, so it does not need the overlay. With the overlay or the module, if your nixpkgs' `claude-code` is older than the release Meridian requires, Meridian builds that same package at the required release; once your nixpkgs catches up, Meridian uses yours unchanged.
 
 **Home Manager service** -- run Meridian as a user systemd service:
 
