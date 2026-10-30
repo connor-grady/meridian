@@ -15,8 +15,10 @@ jobs:
       - uses: cachix/install-nix-action@v31
 
       - name: nixpkgs must provide a claude-code satisfying the floor
+        env:
+          NIXPKGS_ALLOW_UNFREE: 1
         run: |
-          satisfies() { nix eval .#packages.x86_64-linux.meridian.drvPath >/dev/null 2>&1; }
+          satisfies() { nix eval --impure .#packages.x86_64-linux.meridian.drvPath >/dev/null 2>&1; }
           if satisfies; then
             echo "current nixpkgs claude-code satisfies the @anthropic-ai/claude-code floor"
             exit 0
@@ -28,6 +30,6 @@ jobs:
           fi
           # Surface the actual eval error so an unrelated eval breakage is not
           # misread as a missing claude-code version.
-          nix eval .#packages.x86_64-linux.meridian.drvPath 2>&1 | tail -20 || true
+          nix eval --impure .#packages.x86_64-linux.meridian.drvPath 2>&1 | tail -20 || true
           echo "::error::evaluation still fails on the latest nixpkgs (see log above); if the error is 'marked as broken', no released nixpkgs claude-code satisfies the @anthropic-ai/claude-code floor yet - hold this bump until nixpkgs packages it"
           exit 1

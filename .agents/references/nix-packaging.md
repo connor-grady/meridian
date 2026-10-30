@@ -6,9 +6,19 @@ anything under `nix/`, or the dependencies in `package.json` and `bun.lock`.
 ## Layout
 
 Each package lives in `nix/pkgs/<name>/`, with its entry point in
-`package.nix` and every file specific to it beside it: `nix/pkgs/meridian/`
-for meridian, whose `package.nix` calls `node_modules.nix` for its dependency
-trees, and `nix/pkgs/meridian-plugin/` for the scrub plugins.
+`package.nix` and every file specific to it beside it. `nix/scope.nix` turns
+`nix/pkgs` into one package scope with `lib.makeScope` and
+`lib.packagesFromDirectoryRecursive`, so packages receive each other as ordinary
+`callPackage` arguments:
+
+- `nix/pkgs/meridian/`: meridian. `package.nix` calls `node_modules.nix` for
+  its dependency trees.
+- `nix/pkgs/buildMeridianPlugin/`: the builder shared by the scrub plugins.
+  `nix/scope.nix` calls it once per `meridian-plugin-*` input to build
+  `meridianPlugins`.
+
+Overlays live in `nix/overlays/`, named for their flake output
+(`meridian.nix`).
 
 A module, its test and its check share one name: the flake output that exports
 the module, without the `Modules` suffix. `homeModules` is backed by
@@ -27,6 +37,27 @@ extend `pkgs` with another flake's overlay to reach one. If nixpkgs lacks a
 tool, do the work with what nixpkgs has. This is why meridian does not use
 bun2nix: its builders are bound to the package set bun2nix's own flake
 evaluates, which is not the one the package is called with.
+
+## Packages are built with the consumer's nixpkgs
+
+Meridian is consumed as a flake input whose `nixpkgs` usually follows the
+consumer's, and the consumer's overlays and `config` belong to their nixpkgs
+instance, not to the source tree `follows` shares. So `nix/scope.nix` is a
+`callPackage` function of a package set, and every output calls it with the
+one it is given: `overlays.meridian` with the consumer's `final`, the Home
+Manager module's default with the module's `pkgs`, and the flake's own
+`legacyPackages` and `packages` with flake-parts' default `pkgs`.
+
+- The flake never instantiates nixpkgs: no `import nixpkgs` and no
+  `_module.args.pkgs`.
+- `packages.<system>` holds `meridian`, and `legacyPackages.<system>` holds
+  only `meridianPlugins`, the nested set `packages` cannot hold. Never expose
+  the scope itself. Nix's installable lookup also tries
+  `legacyPackages.<system>.<path>`, and the scope's own `packages` function
+  makes `.#packages.<system>.meridian` fail to evaluate.
+- Accepting `claude-code`'s unfree licence is the consumer's decision. The flake
+  never sets `allowUnfree` or `allowUnfreePredicate`. Evaluate meridian locally
+  and in CI with `NIXPKGS_ALLOW_UNFREE=1` and `--impure`.
 
 ## node_modules is a fixed-output derivation
 
@@ -82,5 +113,5 @@ After a change, check the run-time closure. It must contain neither `bun` nor
 the `node_modules` derivation:
 
 ```sh
-nix path-info --recursive "$(nix build --no-link --print-out-paths .#meridian)"
+nix path-info --recursive "$(NIXPKGS_ALLOW_UNFREE=1 nix build --impure --no-link --print-out-paths .#meridian)"
 ```
